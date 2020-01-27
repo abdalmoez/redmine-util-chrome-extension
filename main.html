@@ -1,0 +1,45 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Redmine util</title>
+    <script src="main.js">
+    </script>
+    <style>
+    button{
+        width:200px;
+        background-color: #aaaaaa;
+        color: #000000;
+        border:none;
+        margin: 5px 0px 5px 0px;
+        height: 24px;
+        cursor:pointer;
+    }
+    </style>
+  </head>
+  <body>
+    <button id="RedmineContentSwitch">Redmine toggle sidebar</button>
+    <button style="background-color: #d4edda;color:#155724;" id="RedmineTextareaSuccess">Redmine textarea success</button>
+    <button style="background-color: #fff3cd;color:#856404;" id="RedmineTextareaWarning">Redmine textarea warning</button>
+    <button style="background-color: #f8d7da;color:#721c24;" id="RedmineTextareaError">Redmine textarea error</button>
+    <button style="background-color: #d6d8d9;color:#1b1e21;" id="RedmineTextareaDark">Redmine textarea dark</button>
+    <button style="background-color: #fefefe;color:#818182;" id="RedmineTextareaLight">Redmine textarea light</button>
+    <button style="background-color: #d1ecf1;color:#0c5460;" id="RedmineTextareaInfo">Redmine textarea info</button>
+    <button style="background-color: #cce5ff;color:#004085;" id="RedmineTextareaPrimary">Redmine textarea primary</button>
+    <button style="background-color: #e2e3e5;color:#383d41;" id="RedmineTextareaSecondary">Redmine textarea secondary</button>
+    <table style="width: 200px;">
+        <tbody>
+            <tr>
+                <td style="width: 60px;"><label for="RedmineCustomBgColorInput">Background</label></td>
+                <td style="width: 10px;">:</td>
+                <td><input id="RedmineCustomBgColorInput" name="RedmineCustomBgColorInput" type="color" value="#1c6ea4"  style="width: 117px;"/></td>
+            </tr>
+            <tr>
+                <td><label for="RedmineCustomColorInput">Color</label></td>
+                <td>:</td>
+                <td><input id="RedmineCustomColorInput" name="RedmineCustomColorInput" type="color" value="#FFFFFF" style="width: 117px;"/></td>
+            </tr>
+        </tbody>
+    </table>
+    <button id="RedmineCustomColor" style="color:#FFFFFF;background:#1C6EA4">Redmine custom color</button>
+  </body>
+</html>
