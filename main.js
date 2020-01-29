@@ -1,6 +1,64 @@
 document.addEventListener('DOMContentLoaded', function() {
+   uncompressedColorize=function(){
+	 ///Uncompressed Function to be called in current tab
+	 ///This function must be compressed and be returned as string in colorize function
+	 ///Don't Forget to set color and bgcolorfrom parameters in colorize function
+	 
+	 var color = "red";
+	 var bgcolor = "black";
+	 var ae=document.activeElement;
+	if(ae.tagName=="TEXTAREA" && ae.selectionStart!=ae.selectionEnd)
+	{
+	 
+		var parser = new DOMParser();
+		var root = parser.parseFromString("<root>"+  
+			 ae.value.substr(0, ae.selectionStart)+ "<RedmineUtilSelectedItem>" + 
+			 ae.value.substr(ae.selectionStart,ae.selectionEnd-ae.selectionStart) + 
+			 "</RedmineUtilSelectedItem>" + ae.value.substr(ae.selectionEnd)+"</root>", "application/xml");
+		var perror=root.getElementsByTagName("parsererror");
+		if(perror.length!=0)
+		{
+			alert(perror[0].innerText);
+		}
+		else 
+		{
+			var selectedNode = root.getElementsByTagName("RedmineUtilSelectedItem")[0];
+			var parentNode = selectedNode.parentNode;
+			switch(parentNode.tagName)
+			{
+			   case "root": 
+				ae.value =  ae.value.substr(0, ae.selectionStart)+ 
+						"%{background:"+bgcolor+";color:"+color+"}<notextile>" + 
+							ae.value.substr(ae.selectionStart,ae.selectionEnd - ae.selectionStart) + 
+						 "</notextile>% " + 
+						 ae.value.substr(ae.selectionEnd);
+						 break;
+			   case "code":
+				ae.value = ae.value.substr(0, ae.selectionStart)+ 
+					"</"+parentNode.tagName+">%{background:"+bgcolor+";color:"+color+"}<notextile>" + 
+						ae.value.substr(ae.selectionStart,ae.selectionEnd - ae.selectionStart) + 
+					 "</notextile>% <"+parentNode.tagName+" class=\""+ parentNode.className +"\"> "+
+					 ae.value.substr(ae.selectionEnd);
+				 break;
+			   case "pre":
+				
+				ae.value = 
+					ae.value.substr(0, ae.selectionStart)+ 
+					((selectedNode.previousElementSibling===null)?"<notextile></notextile>":"") + 
+					"%{background:"+bgcolor+";color:"+color+"}<notextile>" + 
+						ae.value.substr(ae.selectionStart,ae.selectionEnd - ae.selectionStart) + 
+					 "</notextile>% "+
+					 ae.value.substr(ae.selectionEnd);
+				 break;
+			}
+		}
+	}
+  }
+  
+  
+  
   colorize=function (color,bgcolor){
-    return 'if(document.activeElement.tagName=="TEXTAREA"){var ae=document.activeElement;if(ae.selectionStart!=ae.selectionEnd) {ae.value=ae.value.substr(0, ae.selectionStart)+ "</code>%{background:'+bgcolor+';color:'+color+'}<notextile>" + ae.value.substr(ae.selectionStart,ae.selectionEnd-ae.selectionStart) + \'</notextile>%<code class="php"> \'+ ae.value.substr(ae.selectionEnd);}}';
+    return 'var color="'+color+'",bgcolor="'+bgcolor+'",ae=document.activeElement;if("TEXTAREA"==ae.tagName&&ae.selectionStart!=ae.selectionEnd){var parser=new DOMParser,root=parser.parseFromString("<root>"+ae.value.substr(0,ae.selectionStart)+"<RedmineUtilSelectedItem>"+ae.value.substr(ae.selectionStart,ae.selectionEnd-ae.selectionStart)+"</RedmineUtilSelectedItem>"+ae.value.substr(ae.selectionEnd)+"</root>","application/xml"),perror=root.getElementsByTagName("parsererror");if(0!=perror.length)alert(perror[0].innerText);else{var selectedNode=root.getElementsByTagName("RedmineUtilSelectedItem")[0],parentNode=selectedNode.parentNode;switch(parentNode.tagName){case"root":ae.value=ae.value.substr(0,ae.selectionStart)+"%{background:"+bgcolor+";color:"+color+"}<notextile>"+ae.value.substr(ae.selectionStart,ae.selectionEnd-ae.selectionStart)+"</notextile>% "+ae.value.substr(ae.selectionEnd);break;case"code":ae.value=ae.value.substr(0,ae.selectionStart)+"</"+parentNode.tagName+">%{background:"+bgcolor+";color:"+color+"}<notextile>"+ae.value.substr(ae.selectionStart,ae.selectionEnd-ae.selectionStart)+"</notextile>% <"+parentNode.tagName+" class=\\\""+parentNode.className+"\\\"> "+ae.value.substr(ae.selectionEnd);break;case"pre":ae.value=ae.value.substr(0,ae.selectionStart)+(null===selectedNode.previousElementSibling?"<notextile></notextile>":"")+"%{background:"+bgcolor+";color:"+color+"}<notextile>"+ae.value.substr(ae.selectionStart,ae.selectionEnd-ae.selectionStart)+"</notextile>% "+ae.value.substr(ae.selectionEnd)}}}';
   }
 
   document.getElementById('RedmineContentSwitch').addEventListener('click', function() {
