@@ -1,5 +1,6 @@
+var version="0.1.1";
 document.addEventListener('DOMContentLoaded', function() {
-   uncompressedColorize=function(){
+  uncompressedColorize=function(){
 	 ///Uncompressed Function to be called in current tab
 	 ///This function must be compressed and be returned as string in colorize function
 	 ///Don't Forget to set color and bgcolorfrom parameters in colorize function
@@ -9,22 +10,43 @@ document.addEventListener('DOMContentLoaded', function() {
 	 var ae=document.activeElement;
 	if(ae.tagName=="TEXTAREA" && ae.selectionStart!=ae.selectionEnd)
 	{
-	 
-		var parser = new DOMParser();
-		var root = parser.parseFromString("<root>"+  
-			 ae.value.substr(0, ae.selectionStart)+ "<RedmineUtilSelectedItem>" + 
-			 ae.value.substr(ae.selectionStart,ae.selectionEnd-ae.selectionStart) + 
-			 "</RedmineUtilSelectedItem>" + ae.value.substr(ae.selectionEnd)+"</root>", "application/xml");
-		var perror=root.getElementsByTagName("parsererror");
-		if(perror.length!=0)
-		{
-			alert(perror[0].innerText);
+		
+		const findtag= (before_text)=> {
+			var index_pre = Math.max(before_text.lastIndexOf("<pre>"), before_text.lastIndexOf("<pre "));
+			var index_code = Math.max(before_text.lastIndexOf("<code>"), before_text.lastIndexOf("<code "));
+			if(index_pre == -1 && index_code == -1)
+				return {
+					tag_params:"",
+					content_before_selection: before_text,
+					tag_name : "root"
+				};
+			else if(index_pre<index_code) {
+				tag_content = before_text.substring(index_code+5);
+				if(tag_content.search(">") == -1) {
+					alert("Syntax error: <code>");
+					return;
+				}
+				return {
+					tag_params : tag_content.substring(0,tag_content.search(">")-1),
+					content_before_selection: tag_content.substring(tag_content.search(">")+1),
+					tag_name : "code"
+				};
+			} else	{
+				tag_content = before_text.substring(index_pre+4);
+				if(tag_content.search(">") == -1) {
+					alert("Syntax error: <pre>");
+					return;
+				}
+				return {
+					tag_params : tag_content.substring(0,tag_content.search(">")-1),
+					content_before_selection: tag_content.substring(tag_content.search(">")+1),
+					tag_name : "pre"
+				};
+			}
 		}
-		else 
+		context = findtag(ae.value.substr(0, ae.selectionStart));
 		{
-			var selectedNode = root.getElementsByTagName("RedmineUtilSelectedItem")[0];
-			var parentNode = selectedNode.parentNode;
-			switch(parentNode.tagName)
+			switch(context.tag_name)
 			{
 			   case "root": 
 				ae.value =  ae.value.substr(0, ae.selectionStart)+ 
@@ -35,16 +57,16 @@ document.addEventListener('DOMContentLoaded', function() {
 						 break;
 			   case "code":
 				ae.value = ae.value.substr(0, ae.selectionStart)+ 
-					"</"+parentNode.tagName+">%{background:"+bgcolor+";color:"+color+"}<notextile>" + 
+					"</"+context.tag_name+">%{background:"+bgcolor+";color:"+color+"}<notextile>" + 
 						ae.value.substr(ae.selectionStart,ae.selectionEnd - ae.selectionStart) + 
-					 "</notextile>% <"+parentNode.tagName+" class=\""+ parentNode.className +"\"> "+
+					 "</notextile>% <"+context.tag_name+" "+context.tag_params +"> "+
 					 ae.value.substr(ae.selectionEnd);
 				 break;
 			   case "pre":
-				
+				var state= (context.content_before_selection.search("</notextile>") != -1 || context.content_before_selection.search("</code>") != -1 );
 				ae.value = 
 					ae.value.substr(0, ae.selectionStart)+ 
-					((selectedNode.previousElementSibling===null)?"<notextile></notextile>":"") + 
+					(state?"":"<notextile></notextile>") + 
 					"%{background:"+bgcolor+";color:"+color+"}<notextile>" + 
 						ae.value.substr(ae.selectionStart,ae.selectionEnd - ae.selectionStart) + 
 					 "</notextile>% "+
@@ -58,7 +80,7 @@ document.addEventListener('DOMContentLoaded', function() {
   
   
   colorize=function (color,bgcolor){
-    return 'var color="'+color+'",bgcolor="'+bgcolor+'",ae=document.activeElement;if("TEXTAREA"==ae.tagName&&ae.selectionStart!=ae.selectionEnd){var parser=new DOMParser,root=parser.parseFromString("<root>"+ae.value.substr(0,ae.selectionStart)+"<RedmineUtilSelectedItem>"+ae.value.substr(ae.selectionStart,ae.selectionEnd-ae.selectionStart)+"</RedmineUtilSelectedItem>"+ae.value.substr(ae.selectionEnd)+"</root>","application/xml"),perror=root.getElementsByTagName("parsererror");if(0!=perror.length)alert(perror[0].innerText);else{var selectedNode=root.getElementsByTagName("RedmineUtilSelectedItem")[0],parentNode=selectedNode.parentNode;switch(parentNode.tagName){case"root":ae.value=ae.value.substr(0,ae.selectionStart)+"%{background:"+bgcolor+";color:"+color+"}<notextile>"+ae.value.substr(ae.selectionStart,ae.selectionEnd-ae.selectionStart)+"</notextile>% "+ae.value.substr(ae.selectionEnd);break;case"code":ae.value=ae.value.substr(0,ae.selectionStart)+"</"+parentNode.tagName+">%{background:"+bgcolor+";color:"+color+"}<notextile>"+ae.value.substr(ae.selectionStart,ae.selectionEnd-ae.selectionStart)+"</notextile>% <"+parentNode.tagName+" class=\\\""+parentNode.className+"\\\"> "+ae.value.substr(ae.selectionEnd);break;case"pre":ae.value=ae.value.substr(0,ae.selectionStart)+(null===selectedNode.previousElementSibling?"<notextile></notextile>":"")+"%{background:"+bgcolor+";color:"+color+"}<notextile>"+ae.value.substr(ae.selectionStart,ae.selectionEnd-ae.selectionStart)+"</notextile>% "+ae.value.substr(ae.selectionEnd)}}}';
+    return 'var color="'+color+'",bgcolor="'+bgcolor+'", ae=document.activeElement;if("TEXTAREA"==ae.tagName&&ae.selectionStart!=ae.selectionEnd){switch(context=(e=>{var t=Math.max(e.lastIndexOf("<pre>"),e.lastIndexOf("<pre ")),a=Math.max(e.lastIndexOf("<code>"),e.lastIndexOf("<code "));return-1==t&&-1==a?{tag_params:"",content_before_selection:e,tag_name:"root"}:t<a?(tag_content=e.substring(a+5),-1==tag_content.search(">")?void alert("Syntax error"):{tag_params:tag_content.substring(0,tag_content.search(">")-1),content_before_selection:tag_content.substring(tag_content.search(">")+1),tag_name:"code"}):(tag_content=e.substring(t+4),-1==tag_content.search(">")?void alert("Syntax error"):{tag_params:tag_content.substring(0,tag_content.search(">")-1),content_before_selection:tag_content.substring(tag_content.search(">")+1),tag_name:"pre"})})(ae.value.substr(0,ae.selectionStart)),context.tag_name){case"root":ae.value=ae.value.substr(0,ae.selectionStart)+"%{background:"+bgcolor+";color:"+color+"}<notextile>"+ae.value.substr(ae.selectionStart,ae.selectionEnd-ae.selectionStart)+"</notextile>% "+ae.value.substr(ae.selectionEnd);break;case"code":ae.value=ae.value.substr(0,ae.selectionStart)+"</"+context.tag_name+">%{background:"+bgcolor+";color:"+color+"}<notextile>"+ae.value.substr(ae.selectionStart,ae.selectionEnd-ae.selectionStart)+"</notextile>% <"+context.tag_name+" "+context.tag_params+"> "+ae.value.substr(ae.selectionEnd);break;case"pre":var state=-1!=context.content_before_selection.search("</notextile>")||-1!=context.content_before_selection.search("</code>");ae.value=ae.value.substr(0,ae.selectionStart)+(state?"":"<notextile></notextile>")+"%{background:"+bgcolor+";color:"+color+"}<notextile>"+ae.value.substr(ae.selectionStart,ae.selectionEnd-ae.selectionStart)+"</notextile>% "+ae.value.substr(ae.selectionEnd)}}';
   }
 
   document.getElementById('RedmineContentSwitch').addEventListener('click', function() {
@@ -98,7 +120,6 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('RedmineCustomColor').style.color = document.getElementById('RedmineCustomColorInput').value;
   });
   document.getElementById('RedmineCustomBgColorInput').addEventListener('change', function() {
-	  console.log("change");
     localStorage.setItem('custombgcolor', document.getElementById('RedmineCustomBgColorInput').value);
     document.getElementById('RedmineCustomColor').style.backgroundColor = document.getElementById('RedmineCustomBgColorInput').value;
   });
@@ -116,4 +137,21 @@ document.addEventListener('DOMContentLoaded', function() {
 	document.getElementById('RedmineCustomColorInput').value = customcolor;
 	document.getElementById('RedmineCustomColor').style.color = customcolor;	
   }
+  document.getElementById('RedmineUpdate').addEventListener('click', function() {
+    chrome.tabs.create({ url: "https://github.com/abdalmoez/redmine-util-chrome-extension" });
+  });
+  var xmlHttp = new XMLHttpRequest();
+    xmlHttp.open( "GET", "https://raw.githubusercontent.com/abdalmoez/redmine-util-chrome-extension/master/version"); 
+    xmlHttp.onreadystatechange= (e)=>{ 
+	if(xmlHttp.readyState == 4 && xmlHttp.status == 200) 
+	{
+		var new_version = xmlHttp.responseText.trim();
+		if(new_version>version)
+		{
+			document.getElementById('RedmineUpdate').removeAttribute('hidden');
+			document.getElementById('RedmineUpdateNewVersion').innerText = new_version;
+		}
+	}
+    }
+    xmlHttp.send( null );
 });
