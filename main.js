@@ -1,4 +1,4 @@
-var version="0.1.1";
+var version="0.1.2";
 document.addEventListener('DOMContentLoaded', function() {
   uncompressedColorize=function(){
 	 ///Uncompressed Function to be called in current tab
@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', function() {
 					return;
 				}
 				return {
-					tag_params : tag_content.substring(0,tag_content.search(">")-1),
+					tag_params : tag_content.substring(0,tag_content.search(">")),
 					content_before_selection: tag_content.substring(tag_content.search(">")+1),
 					tag_name : "code"
 				};
@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', function() {
 					return;
 				}
 				return {
-					tag_params : tag_content.substring(0,tag_content.search(">")-1),
+					tag_params : tag_content.substring(0,tag_content.search(">")),
 					content_before_selection: tag_content.substring(tag_content.search(">")+1),
 					tag_name : "pre"
 				};
@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', function() {
   
   
   colorize=function (color,bgcolor){
-    return 'var color="'+color+'",bgcolor="'+bgcolor+'", ae=document.activeElement;if("TEXTAREA"==ae.tagName&&ae.selectionStart!=ae.selectionEnd){switch(context=(e=>{var t=Math.max(e.lastIndexOf("<pre>"),e.lastIndexOf("<pre ")),a=Math.max(e.lastIndexOf("<code>"),e.lastIndexOf("<code "));return-1==t&&-1==a?{tag_params:"",content_before_selection:e,tag_name:"root"}:t<a?(tag_content=e.substring(a+5),-1==tag_content.search(">")?void alert("Syntax error"):{tag_params:tag_content.substring(0,tag_content.search(">")-1),content_before_selection:tag_content.substring(tag_content.search(">")+1),tag_name:"code"}):(tag_content=e.substring(t+4),-1==tag_content.search(">")?void alert("Syntax error"):{tag_params:tag_content.substring(0,tag_content.search(">")-1),content_before_selection:tag_content.substring(tag_content.search(">")+1),tag_name:"pre"})})(ae.value.substr(0,ae.selectionStart)),context.tag_name){case"root":ae.value=ae.value.substr(0,ae.selectionStart)+"%{background:"+bgcolor+";color:"+color+"}<notextile>"+ae.value.substr(ae.selectionStart,ae.selectionEnd-ae.selectionStart)+"</notextile>% "+ae.value.substr(ae.selectionEnd);break;case"code":ae.value=ae.value.substr(0,ae.selectionStart)+"</"+context.tag_name+">%{background:"+bgcolor+";color:"+color+"}<notextile>"+ae.value.substr(ae.selectionStart,ae.selectionEnd-ae.selectionStart)+"</notextile>% <"+context.tag_name+" "+context.tag_params+"> "+ae.value.substr(ae.selectionEnd);break;case"pre":var state=-1!=context.content_before_selection.search("</notextile>")||-1!=context.content_before_selection.search("</code>");ae.value=ae.value.substr(0,ae.selectionStart)+(state?"":"<notextile></notextile>")+"%{background:"+bgcolor+";color:"+color+"}<notextile>"+ae.value.substr(ae.selectionStart,ae.selectionEnd-ae.selectionStart)+"</notextile>% "+ae.value.substr(ae.selectionEnd)}}';
+    return 'var color="'+color+'",bgcolor="'+bgcolor+'", ae=document.activeElement;if("TEXTAREA"==ae.tagName&&ae.selectionStart!=ae.selectionEnd){switch(context=(e=>{var t=Math.max(e.lastIndexOf("<pre>"),e.lastIndexOf("<pre ")),a=Math.max(e.lastIndexOf("<code>"),e.lastIndexOf("<code "));return-1==t&&-1==a?{tag_params:"",content_before_selection:e,tag_name:"root"}:t<a?(tag_content=e.substring(a+5),-1==tag_content.search(">")?void alert("Syntax error"):{tag_params:tag_content.substring(0,tag_content.search(">")),content_before_selection:tag_content.substring(tag_content.search(">")+1),tag_name:"code"}):(tag_content=e.substring(t+4),-1==tag_content.search(">")?void alert("Syntax error"):{tag_params:tag_content.substring(0,tag_content.search(">")),content_before_selection:tag_content.substring(tag_content.search(">")+1),tag_name:"pre"})})(ae.value.substr(0,ae.selectionStart)),context.tag_name){case"root":ae.value=ae.value.substr(0,ae.selectionStart)+"%{background:"+bgcolor+";color:"+color+"}<notextile>"+ae.value.substr(ae.selectionStart,ae.selectionEnd-ae.selectionStart)+"</notextile>% "+ae.value.substr(ae.selectionEnd);break;case"code":ae.value=ae.value.substr(0,ae.selectionStart)+"</"+context.tag_name+">%{background:"+bgcolor+";color:"+color+"}<notextile>"+ae.value.substr(ae.selectionStart,ae.selectionEnd-ae.selectionStart)+"</notextile>% <"+context.tag_name+" "+context.tag_params+"> "+ae.value.substr(ae.selectionEnd);break;case"pre":var state=-1!=context.content_before_selection.search("</notextile>")||-1!=context.content_before_selection.search("</code>");ae.value=ae.value.substr(0,ae.selectionStart)+(state?"":"<notextile></notextile>")+"%{background:"+bgcolor+";color:"+color+"}<notextile>"+ae.value.substr(ae.selectionStart,ae.selectionEnd-ae.selectionStart)+"</notextile>% "+ae.value.substr(ae.selectionEnd)}}';
   }
 
   document.getElementById('RedmineContentSwitch').addEventListener('click', function() {
@@ -140,18 +140,43 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('RedmineUpdate').addEventListener('click', function() {
     chrome.tabs.create({ url: "https://github.com/abdalmoez/redmine-util-chrome-extension" });
   });
-  var xmlHttp = new XMLHttpRequest();
-    xmlHttp.open( "GET", "https://raw.githubusercontent.com/abdalmoez/redmine-util-chrome-extension/master/version"); 
-    xmlHttp.onreadystatechange= (e)=>{ 
-	if(xmlHttp.readyState == 4 && xmlHttp.status == 200) 
-	{
-		var new_version = xmlHttp.responseText.trim();
-		if(new_version>version)
-		{
-			document.getElementById('RedmineUpdate').removeAttribute('hidden');
-			document.getElementById('RedmineUpdateNewVersion').innerText = new_version;
+
+  //Update check
+  var last_update_check = localStorage.getItem('lastupdatecheck');
+
+  var new_version = localStorage.getItem('lastupdatecheckversion') || version;
+  var diffDays = 1;
+  
+  if(last_update_check!==null)
+  {
+	diffDays = Math.floor((new Date() - new Date(last_update_check)) / (1000 * 60 * 60 * 24)); 
+  }
+
+  if(diffDays !== 0 && navigator.connection.rtt != 0) 
+  {
+	var xmlHttp = new XMLHttpRequest();
+	xmlHttp.open( "GET", "https://raw.githubusercontent.com/abdalmoez/redmine-util-chrome-extension/master/version"); 
+	xmlHttp.onreadystatechange= (e)=> { 
+		if(xmlHttp.readyState == 4 && xmlHttp.status == 200) 
+		{		
+			new_version = xmlHttp.responseText.trim();
+  			localStorage.setItem('lastupdatecheck', new Date());
+  			localStorage.setItem('lastupdatecheckversion', new_version);
+			if(new_version>version)
+			{
+				document.getElementById('RedmineUpdate').removeAttribute('hidden');
+				document.getElementById('RedmineUpdateNewVersion').innerText = new_version;
+			}
 		}
 	}
-    }
-    xmlHttp.send( null );
+	xmlHttp.send( null );
+  } 
+  else 
+  {
+	if(new_version>version)
+	{
+		document.getElementById('RedmineUpdate').removeAttribute('hidden');
+		document.getElementById('RedmineUpdateNewVersion').innerText = new_version;
+	}
+  }
 });
