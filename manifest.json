@@ -3,7 +3,7 @@
   
     "name": "Redmine utils",
     "description": "Usefull coloring redmine tool",
-    "version": "1.0",
+    "version": "0.1.4",
   
     "icons": { 
         "512": "icon.png"
@@ -13,15 +13,12 @@
      "default_popup": "main.html"
     },
     
-    "permissions": [
-     "activeTab"
-    ],
+    "permissions": [ "activeTab" ],
     "content_scripts": [
 	    {
             "matches":["<all_urls>"],
-            "js": [
-                "page.inc.js"
-                ]
+            "js": [ "page.inc.js" ]
 	    }
-	]
+    ],
+    "web_accessible_resources": [ "toolbar.html" ]
   }

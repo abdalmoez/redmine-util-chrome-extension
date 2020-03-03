@@ -1,0 +1,32 @@
+<div class="RedmineUtilToolBar">
+    <style>
+    .RedmineUtilToolBar body{
+        margin:0;
+    }
+    .RedmineUtilToolBar button,
+    .RedmineUtilToolBar input{
+        width:100px;
+        background-color: #aaaaaa;
+        color: #000000;
+        border:none;
+        margin: 5px 5px 5px 5px;
+        height: 24px;
+        cursor:pointer;
+    }
+    </style>
+    <span style="display: inline-flex;width: 100px;margin: 5px;color: #0c5460;font-family: monospace;">Redmine Util</span>
+    <button id="RedmineContentSwitch">Toggle sidebar</button>
+    <button id="RedmineCheckTextile">Check syntax</button>
+    <button style="background-color: #d4edda;color:#155724;" class="RedminePredefinedColor">Success</button>
+    <button style="background-color: #fff3cd;color:#856404;" class="RedminePredefinedColor">Warning</button>
+    <button style="background-color: #f8d7da;color:#721c24;" class="RedminePredefinedColor">Error</button>
+    <button style="background-color: #d6d8d9;color:#1b1e21;" class="RedminePredefinedColor">Dark</button>
+    <button style="background-color: #fefefe;color:#818182;" class="RedminePredefinedColor">Light</button>
+    <button style="background-color: #d1ecf1;color:#0c5460;" class="RedminePredefinedColor">Info</button>
+    <button style="background-color: #cce5ff;color:#004085;" class="RedminePredefinedColor">Primary</button>
+    <button style="background-color: #e2e3e5;color:#383d41;" class="RedminePredefinedColor">Secondary</button>   
+    <input id="RedmineCustomBgColorInput" name="RedmineCustomBgColorInput" type="color" value="#1c6ea4"  style="width: 40px; background-color: #eee;"/>
+    <input id="RedmineCustomColorInput" name="RedmineCustomColorInput" type="color" value="#FFFFFF" style="width: 40px;background-color: #eee;"/>
+    <button id="RedmineCustomColor" style="background-color: #1C6EA4;color:#FFFFFF;" class="RedminePredefinedColor">Custom color</button>
+    <button id="RedmineUpdate" hidden style="color: grey;background: transparent;width: 300px;">New update is available! Version: <span id="RedmineUpdateNewVersion"></span></button>
+</div>
