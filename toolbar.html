@@ -1,32 +1,124 @@
-<div class="RedmineUtilToolBar">
+<div class="RedmineUtilToolBar" style="background-color: #fafafb;font: 400 13.3333px Arial;padding-left:5px;">
     <style>
     .RedmineUtilToolBar body{
         margin:0;
     }
     .RedmineUtilToolBar button,
     .RedmineUtilToolBar input{
-        width:100px;
-        background-color: #aaaaaa;
-        color: #000000;
+        background-color: #fafafb;
+        font: 400 13.3333px Arial;
+        color: #535a60;
         border:none;
-        margin: 5px 5px 5px 5px;
-        height: 24px;
+        margin-right: 5px;
+        height: 29px;
         cursor:pointer;
+        /*border-radius: 1000px;*/
+    }
+    .RedmineUtilToolBar button:hover,
+    .RedmineUtilToolBar input:hover {
+        /*background-color: #201c29;*/
+        background-color: #e4e6e8;
+        color: #0c0d0e;
+    }
+
+    /* Dropdown Button */
+    .dropbtn {
+      padding: 16px;
+      font-size: 16px;
+      min-width: 160px;
+      border: none;
+    }
+
+    /* The container <div> - needed to position the dropdown content */
+    .RedmineUtilDropdown {
+      position: relative;
+      display: inline-block;
+    }
+
+    /* Dropdown Content (Hidden by Default) */
+    .RedmineUtilDropdownContent {
+      display: none;
+      position: absolute;
+      background-color: #f1f1f1;
+      min-width: 160px;
+      box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+      z-index: 1;
+    }
+
+    /* Links inside the dropdown */
+    .RedmineUtilDropdownContent a {
+      color: black;
+      padding: 12px 16px;
+      text-decoration: none;
+      display: block;
+    }
+
+    /* Change color of dropdown links on hover */
+    .RedmineUtilDropdownContent a:hover {background-color: #ddd;}
+
+    /* Show the dropdown menu on hover */
+    .RedmineUtilDropdown:hover .RedmineUtilDropdownContent {display: block;}
+
+    /* Change the background color of the dropdown button when the dropdown content is shown */
+    .RedmineUtilDropdown:hover .RedmineUtilDropBtn {background-color: #e4e6e8;}
+
+    /* The whole thing */
+    #RedmineUtilBookmarkContextMenu {
+        display: none;
+        z-index: 1000;
+        position: absolute;
+        overflow: hidden;
+        border: 1px solid #CCC;
+        white-space: nowrap;
+        font-family: sans-serif;
+        background: #FFF;
+        color: #333;
+        border-radius: 5px;
+        padding: 0;
+    }
+
+    /* Each of the items in the list */
+    #RedmineUtilBookmarkContextMenu li {
+        padding: 8px 12px;
+        cursor: pointer;
+        list-style-type: none;
+        transition: all .3s ease;
+        user-select: none;
+    }
+
+    #RedmineUtilBookmarkContextMenu li:hover {
+        background-color: #DEF;
     }
     </style>
-    <span style="display: inline-flex;width: 100px;margin: 5px;color: #0c5460;font-family: monospace;">Redmine Util</span>
+    <span style="display: inline-flex;width: 100px;margin: 5px;color: #0c5460;">Redmine Util</span>
     <button id="RedmineContentSwitch">Toggle sidebar</button>
     <button id="RedmineCheckTextile">Check syntax</button>
-    <button style="background-color: #d4edda;color:#155724;" class="RedminePredefinedColor">Success</button>
-    <button style="background-color: #fff3cd;color:#856404;" class="RedminePredefinedColor">Warning</button>
-    <button style="background-color: #f8d7da;color:#721c24;" class="RedminePredefinedColor">Error</button>
-    <button style="background-color: #d6d8d9;color:#1b1e21;" class="RedminePredefinedColor">Dark</button>
-    <button style="background-color: #fefefe;color:#818182;" class="RedminePredefinedColor">Light</button>
-    <button style="background-color: #d1ecf1;color:#0c5460;" class="RedminePredefinedColor">Info</button>
-    <button style="background-color: #cce5ff;color:#004085;" class="RedminePredefinedColor">Primary</button>
-    <button style="background-color: #e2e3e5;color:#383d41;" class="RedminePredefinedColor">Secondary</button>   
-    <input id="RedmineCustomBgColorInput" name="RedmineCustomBgColorInput" type="color" value="#1c6ea4"  style="width: 40px; background-color: #eee;"/>
-    <input id="RedmineCustomColorInput" name="RedmineCustomColorInput" type="color" value="#FFFFFF" style="width: 40px;background-color: #eee;"/>
+    <div class="RedmineUtilDropdown">
+        <button class="RedmineUtilDropBtn" style="width: 160px">Bootstrap colors</button>
+        <div class="RedmineUtilDropdownContent">
+            <a style="background-color: #d4edda;color:#155724;cursor: pointer;" class="RedminePredefinedColor">Success</a>
+            <a style="background-color: #fff3cd;color:#856404;cursor: pointer;" class="RedminePredefinedColor">Warning</a>
+            <a style="background-color: #f8d7da;color:#721c24;cursor: pointer;" class="RedminePredefinedColor">Error</a>
+            <a style="background-color: #d6d8d9;color:#1b1e21;cursor: pointer;" class="RedminePredefinedColor">Dark</a>
+            <a style="background-color: #fefefe;color:#818182;cursor: pointer;" class="RedminePredefinedColor">Light</a>
+            <a style="background-color: #d1ecf1;color:#0c5460;cursor: pointer;" class="RedminePredefinedColor">Info</a>
+            <a style="background-color: #cce5ff;color:#004085;cursor: pointer;" class="RedminePredefinedColor">Primary</a>
+            <a style="background-color: #e2e3e5;color:#383d41;cursor: pointer;" class="RedminePredefinedColor">Secondary</a>
+        </div>
+    </div>
+    <input class="jscolor" style="width: 80px;text-align: center;" id="RedmineCustomBgColorInput" value="#1c6ea4" />
+    <input class="jscolor" style="width: 80px;text-align: center;" id="RedmineCustomColorInput"   value="#FFFFFF" />
     <button id="RedmineCustomColor" style="background-color: #1C6EA4;color:#FFFFFF;" class="RedminePredefinedColor">Custom color</button>
-    <button id="RedmineUpdate" hidden style="color: grey;background: transparent;width: 300px;">New update is available! Version: <span id="RedmineUpdateNewVersion"></span></button>
+    <button id="RedmineBookmarkCustomColor">Bookmark custom color</button>
+    <div class="RedmineUtilDropdown">
+      <button class="RedmineUtilDropBtn" style="width: 160px">Bookmark</button>
+      <div class="RedmineUtilDropdownContent" id="RedmineUtilBookmarkContent">
+          <a style="background-color: #d4edda;color:#155724;cursor: pointer;" class="RedminePredefinedColor">Success</a>
+      </div>
+      <ul id='RedmineUtilBookmarkContextMenu'>
+        <li data-action="remove">Remove from bookmark</li>
+        <li data-action="rename">Change label</li>
+      </ul>
+    </div>
+    <a id="RedmineUpdate" href="https://github.com/abdalmoez/redmine-util-chrome-extension/"  target="_blank" hidden style="text-decoration: none;color: grey;background: transparent;width: 300px;">New update is available! Version: <span id="RedmineUpdateNewVersion"></span></a>
 </div>

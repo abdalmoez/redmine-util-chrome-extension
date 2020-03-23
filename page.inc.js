@@ -1,7 +1,7 @@
 if(localStorage.getItem('RedmineUtil_enabled')==="TRUE")
 {
     
-    const REDMINE_UTIL_VERSION="0.1.4";
+    const REDMINE_UTIL_VERSION="0.2.0";
     const REDMINE_TOOL_ROOT_TAG         = "RedmineToolRoot";
     const REDMINE_TOOL_SELECTION_TAG    = "RedmineToolSelection";
     const REDMINE_TOOL_TAGS             = [REDMINE_TOOL_ROOT_TAG, REDMINE_TOOL_SELECTION_TAG]
@@ -40,7 +40,8 @@ if(localStorage.getItem('RedmineUtil_enabled')==="TRUE")
         return errors;
     }
 
-    function RedmineUtil_parseTag(tag) {
+    function RedmineUtil_parseTag(tag)
+    {
         var res = {
             type: 'tag',
             isClosed: false,
@@ -92,7 +93,8 @@ if(localStorage.getItem('RedmineUtil_enabled')==="TRUE")
         return res;
     };
 
-    function RedmineUtil_parse(content) {
+    function RedmineUtil_parse(content)
+    {
         var result = {
             name: null,
             isRoot: true,
@@ -320,6 +322,7 @@ if(localStorage.getItem('RedmineUtil_enabled')==="TRUE")
         {
             document.execCommand("insertText", false, new_value);
         }
+        active_textarea.focus();
     }
     function RedmineUtil_rgb2hex(rgb) 
     {
@@ -368,15 +371,14 @@ if(localStorage.getItem('RedmineUtil_enabled')==="TRUE")
     function RedmineUtil_checkUpdate()
     {
         var last_update_check = localStorage.getItem('RedmineUtil_lastUpdateCheck');
-    
-        var new_version = localStorage.getItem('RedmineUtil_lastUpdateCheckVersion') || REDMINE_UTIL_VERSION;
-        var diffDays = 1;
+        var new_version       = localStorage.getItem('RedmineUtil_lastUpdateCheckVersion') || REDMINE_UTIL_VERSION;
+        var diffDays          = 1;
         
         if(last_update_check!==null)
         {
             diffDays = Math.floor((new Date() - new Date(last_update_check)) / (1000 * 60 * 60 * 24)); 
         }
-    
+
         if(diffDays !== 0 && navigator.connection.rtt != 0) 
         {
             var xmlHttp = new XMLHttpRequest();
@@ -405,65 +407,194 @@ if(localStorage.getItem('RedmineUtil_enabled')==="TRUE")
             }
         }
     }
-    var xmlHttp = new XMLHttpRequest();
-    xmlHttp.open( "GET", chrome.extension.getURL('toolbar.html')); 
-    xmlHttp.onreadystatechange= (e)=> { 
-        if(xmlHttp.readyState == 4 && xmlHttp.status == 200) 
-        {		
-            var iframe = document.createElement('div');
-            iframe.innerHTML=xmlHttp.responseText.trim();
-            iframe.id="REDMINE_UTIL_TOOLBAR_ROOT";
-            iframe.style.height="auto";
-            iframe.style.width="100%";
-            iframe.style.position = "fixed";
-            iframe.style.top = "0";
-            iframe.style.left = "0";
-            iframe.style.background = "#eee";
-            iframe.style.color = "white";
-            iframe.style.border = "0";
-            iframe.style.padding = "0px 0px 0px 5px";
-            iframe.style.margin = "0";
-            document.children[0].append(iframe);
-            document.body.style.webkitTransform="translateY(35px)"
+    function RedmineUtil_isValidName(bookmark, new_name)
+    {
+        return (new_name.length >= 3) && ( bookmark.findIndex(cell => cell.name === new_name) === -1 );
+    }
+    function RedmineUtil_createContextMenu(parent) 
+    {
+        var context_menu = document.getElementById("RedmineUtilBookmarkContextMenu");
+        var context_menu_items = context_menu.getElementsByTagName('li');
 
-            document.getElementById('RedmineContentSwitch').addEventListener('click', RedmineUtil_toggleSideBar);
+        parent.addEventListener('contextmenu', function(event) {
+            var target = event.target.parentNode.parentNode;
+            // Avoid the real one
+            event.preventDefault();
+            
+            // Show contextmenu
+            context_menu.style.display  = "inline-block";
 
-            document.getElementById('RedmineCheckTextile').addEventListener('mousedown', RedmineUtil_checkSyntax);
+            context_menu.style.top      = (event.pageY - target.offsetTop  - self.frames.scrollY)+ "px";
+            context_menu.style.left     = (event.pageX - target.offsetLeft - self.frames.scrollX)+ "px";
+            context_menu.setAttribute("target-bookmark", event.target.getAttribute("bookmark-index"));
+        });
+        context_menu.addEventListener('mouseleave', function(event) {
+            // If the clicked element is not the menu
+                context_menu.style.display="none";
+        });
 
-            var predefined_color_btns = document.getElementsByClassName('RedminePredefinedColor');
-            for(var i = 0; i < predefined_color_btns.length; i++)
+        if(context_menu.getAttribute("target-bookmark")===null)
+        {    
+            for(var i = 0; i < context_menu_items.length; i++)
             {
-                predefined_color_btns[i].addEventListener('mousedown', function(event) {
-                    RedmineUtil_colorizeSelection(RedmineUtil_rgb2hex(event.target.style.color),RedmineUtil_rgb2hex(event.target.style.backgroundColor));
+                context_menu_items[i].addEventListener('click', function(event) {
+                    var target_bookmark = context_menu.getAttribute("target-bookmark");
+                    var bookmark = JSON.parse(localStorage.getItem('RedmineUtil_Bookmark') || "[]") ;
+
+                    switch(event.target.getAttribute("data-action")) {
+                        
+                        case "remove": 
+                        {
+                            if(confirm(`Are you sure to remove this color '${bookmark[target_bookmark].name}' from bookmark!\n`))
+                            {
+                                bookmark.splice(target_bookmark, 1);
+                                localStorage.setItem('RedmineUtil_Bookmark', JSON.stringify(bookmark));
+                                RedmineUtil_drawBookmark();
+                            }
+                            break;
+                        }
+                        case "rename": 
+                        {
+                            var name;
+                            do {
+                                name = prompt("Enter a new name:\n  Minimal length: 3\n  Old name: "+bookmark[target_bookmark].name);
+                                if(name === null)
+                                {
+                                    break;
+                                }
+                            } while(!RedmineUtil_isValidName(bookmark, name));
+
+                            if(name!==null)
+                            {
+                                bookmark[target_bookmark].name = name;
+                                localStorage.setItem('RedmineUtil_Bookmark', JSON.stringify(bookmark));
+                                RedmineUtil_drawBookmark();
+                            }
+                            break; 
+                        }
+                    }
+                    event.stopPropagation();
+                    event.preventDefault();
+                    context_menu.style.display="none";
                 });
             }
+        }
+        context_menu.setAttribute("target-bookmark", -1);
+    }
+    function RedmineUtil_drawBookmark() 
+    {
 
-            document.getElementById('RedmineCustomColorInput').addEventListener('change', function() {
-                localStorage.setItem('RedmineUtil_customColor', document.getElementById('RedmineCustomColorInput').value);
-                document.getElementById('RedmineCustomColor').style.color = document.getElementById('RedmineCustomColorInput').value;
-            });
-        
-            document.getElementById('RedmineCustomBgColorInput').addEventListener('change', function() {
-                localStorage.setItem('RedmineUtil_customBgColor', document.getElementById('RedmineCustomBgColorInput').value);
-                document.getElementById('RedmineCustomColor').style.backgroundColor = document.getElementById('RedmineCustomBgColorInput').value;
-            });
-        
-            var customcolor = localStorage.getItem('RedmineUtil_customColor');
-            var custombgcolor  = localStorage.getItem('RedmineUtil_customBgColor');
-        
-            if(custombgcolor!=undefined)
+        var bookmark = JSON.parse(localStorage.getItem('RedmineUtil_Bookmark') || "[]") ;
+        var bookmark_content = document.getElementById('RedmineUtilBookmarkContent');
+
+        if(bookmark.length===0)
+        {
+            bookmark_content.parentNode.style.display="none";
+        }
+        else
+        {
+            bookmark_content.parentNode.style.display="inline-block";;
+            var bookmark_html = "";
+            for(var i=0;i<bookmark.length;i++)
             {
-                document.getElementById('RedmineCustomBgColorInput').value = custombgcolor;
-                document.getElementById('RedmineCustomColor').style.backgroundColor = custombgcolor;	
+                bookmark_html+=`<a bookmark-index="${i}" style="background-color: #${bookmark[i].backgroundColor};color:#${bookmark[i].color};cursor: pointer;" class="RedminePredefinedColor">${bookmark[i].name}</a>`;
             }
-        
-            if(customcolor!=undefined)
+            bookmark_content.innerHTML = bookmark_html;
+
+            for(var i=0;i<bookmark_content.children.length;i++)
             {
-                document.getElementById('RedmineCustomColorInput').value = customcolor;
-                document.getElementById('RedmineCustomColor').style.color = customcolor;	
-            }
-            RedmineUtil_checkUpdate();
+                RedmineUtil_createContextMenu(bookmark_content.children[i]);
+            }              
         }
     }
-    xmlHttp.send( null );
+    function RedmineUtil_drawToolBar() 
+    {        
+        var xmlHttp = new XMLHttpRequest();
+        xmlHttp.open( "GET", chrome.extension.getURL('toolbar.html')); 
+        xmlHttp.onreadystatechange= (e)=> { 
+            if(xmlHttp.readyState == 4 && xmlHttp.status == 200) 
+            {		
+                var iframe = document.createElement('div');
+                iframe.innerHTML=xmlHttp.responseText.trim();
+                iframe.id="REDMINE_UTIL_TOOLBAR_ROOT";
+                iframe.style.height="auto";
+                iframe.style.width="100%";
+                iframe.style.position = "fixed";
+                iframe.style.top = "0";
+                iframe.style.left = "0";
+                //iframe.style.background = "#fafafb";
+                iframe.style.color = "white";
+                iframe.style.border = "0";
+                iframe.style.padding = "0";
+                iframe.style.margin = "0";
+                document.children[0].append(iframe);
+                document.body.style.webkitTransform="translateY(35px)"
+
+                document.getElementById('RedmineContentSwitch').addEventListener('click', RedmineUtil_toggleSideBar);
+
+                document.getElementById('RedmineCheckTextile').addEventListener('mousedown', RedmineUtil_checkSyntax);
+
+                var predefined_color_btns = document.getElementsByClassName('RedminePredefinedColor');
+                for(var i = 0; i < predefined_color_btns.length; i++)
+                {
+                    predefined_color_btns[i].addEventListener('mousedown', function(event) {
+                        RedmineUtil_colorizeSelection(RedmineUtil_rgb2hex(event.target.style.color),RedmineUtil_rgb2hex(event.target.style.backgroundColor));
+                    });
+                }
+
+                document.getElementById('RedmineBookmarkCustomColor').addEventListener('click', function() {
+                    var bookmark = JSON.parse(localStorage.getItem('RedmineUtil_Bookmark') || "[]") ;                
+                    var name;
+                    do {
+                        name = prompt("Enter a bookmark unique name:\n  Minimal length: 3");
+                        if(name === null)
+                        {
+                            break;
+                        }
+                    } while(!RedmineUtil_isValidName(bookmark, name));
+
+                    if(name!==null)
+                    {
+                        var color = document.getElementById('RedmineCustomColorInput').value;
+                        var backgroundColor = document.getElementById('RedmineCustomBgColorInput').value;
+                        bookmark.push({name,color,backgroundColor});
+                        localStorage.setItem('RedmineUtil_Bookmark', JSON.stringify(bookmark));
+                        RedmineUtil_drawBookmark();
+                    }
+                });
+
+                document.getElementById('RedmineCustomColorInput').addEventListener('change', function() {
+                    localStorage.setItem('RedmineUtil_customColor', document.getElementById('RedmineCustomColorInput').value);
+                    document.getElementById('RedmineCustomColor').style.color = '#' + document.getElementById('RedmineCustomColorInput').value;
+                });
+            
+                document.getElementById('RedmineCustomBgColorInput').addEventListener('change', function() {
+                    localStorage.setItem('RedmineUtil_customBgColor', document.getElementById('RedmineCustomBgColorInput').value);
+                    document.getElementById('RedmineCustomColor').style.backgroundColor = '#' + document.getElementById('RedmineCustomBgColorInput').value;
+                });
+                
+                var customcolor = localStorage.getItem('RedmineUtil_customColor');
+                var custombgcolor  = localStorage.getItem('RedmineUtil_customBgColor');
+            
+                if(custombgcolor!=undefined)
+                {
+                    new jscolor(document.getElementById('RedmineCustomBgColorInput'), {value : custombgcolor});
+                    document.getElementById('RedmineCustomColor').style.backgroundColor = '#' + custombgcolor;	
+                }
+            
+                if(customcolor!=undefined)
+                {
+                    new jscolor(document.getElementById('RedmineCustomColorInput'), {value : customcolor});
+                    document.getElementById('RedmineCustomColor').style.color = '#' + customcolor;	
+                }
+
+                
+                RedmineUtil_drawBookmark();
+                RedmineUtil_checkUpdate();
+            }
+        }
+        xmlHttp.send( null );
+    }
+
+    RedmineUtil_drawToolBar();
 }
