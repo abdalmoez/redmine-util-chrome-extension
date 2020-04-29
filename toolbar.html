@@ -76,7 +76,7 @@
         border-radius: 5px;
         padding: 0;
     }
-
+    
     /* Each of the items in the list */
     #RedmineUtilBookmarkContextMenu li {
         padding: 8px 12px;
@@ -89,6 +89,12 @@
     #RedmineUtilBookmarkContextMenu li:hover {
         background-color: #DEF;
     }
+    #RedmineUtilBookmarkContextMenu[style*='display: inline-block'] ~ div {
+	display: block;
+     }
+     #RedmineUtilBookmarkContextMenu[style*='display: inline-block'] ~ .RedmineUtilDropBtn {
+	background-color: #e4e6e8;
+     }
     </style>
     <span style="display: inline-flex;width: 100px;margin: 5px;color: #0c5460;">Redmine Util</span>
     <button id="RedmineContentSwitch">Toggle sidebar</button>
@@ -111,14 +117,13 @@
     <button id="RedmineCustomColor" style="background-color: #1C6EA4;color:#FFFFFF;" class="RedminePredefinedColor">Custom color</button>
     <button id="RedmineBookmarkCustomColor">Bookmark custom color</button>
     <div class="RedmineUtilDropdown">
-      <button class="RedmineUtilDropBtn" style="width: 160px">Bookmark</button>
-      <div class="RedmineUtilDropdownContent" id="RedmineUtilBookmarkContent">
-          <a style="background-color: #d4edda;color:#155724;cursor: pointer;" class="RedminePredefinedColor">Success</a>
-      </div>
       <ul id='RedmineUtilBookmarkContextMenu'>
         <li data-action="remove">Remove from bookmark</li>
         <li data-action="rename">Change label</li>
       </ul>
+      <button class="RedmineUtilDropBtn" style="width: 160px">Bookmark</button>
+      <div class="RedmineUtilDropdownContent" id="RedmineUtilBookmarkContent"></div>
+      
     </div>
     <a id="RedmineUpdate" href="https://github.com/abdalmoez/redmine-util-chrome-extension/"  target="_blank" hidden style="text-decoration: none;color: grey;background: transparent;width: 300px;">New update is available! Version: <span id="RedmineUpdateNewVersion"></span></a>
 </div>

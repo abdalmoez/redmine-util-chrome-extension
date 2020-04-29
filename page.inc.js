@@ -180,6 +180,7 @@ if(localStorage.getItem('RedmineUtil_enabled')==="TRUE")
             }
             else
             {
+                //console.log(arr[level]);
                 var c_tag = "</"+ arr[level].name + ">";
 
                 if (c_tag !== tag)
@@ -428,11 +429,16 @@ if(localStorage.getItem('RedmineUtil_enabled')==="TRUE")
             context_menu.style.left     = (event.pageX - target.offsetLeft - self.frames.scrollX)+ "px";
             context_menu.setAttribute("target-bookmark", event.target.getAttribute("bookmark-index"));
         });
-        context_menu.addEventListener('mouseleave', function(event) {
-            // If the clicked element is not the menu
-                context_menu.style.display="none";
-        });
 
+        context_menu.addEventListener('mouseleave', function(event) {
+            context_menu.style.display="none";
+        });
+	document.addEventListener('click', function(event) {
+		if(event.target!=context_menu)
+		{
+			context_menu.style.display="none";
+		}
+        });
         if(context_menu.getAttribute("target-bookmark")===null)
         {    
             for(var i = 0; i < context_menu_items.length; i++)
@@ -497,10 +503,17 @@ if(localStorage.getItem('RedmineUtil_enabled')==="TRUE")
             var bookmark_html = "";
             for(var i=0;i<bookmark.length;i++)
             {
-                bookmark_html+=`<a bookmark-index="${i}" style="background-color: #${bookmark[i].backgroundColor};color:#${bookmark[i].color};cursor: pointer;" class="RedminePredefinedColor">${bookmark[i].name}</a>`;
+                bookmark_html+=`<a bookmark-index="${i}" style="background-color: #${bookmark[i].backgroundColor};color:#${bookmark[i].color};cursor: pointer;">${bookmark[i].name}</a>`;
             }
             bookmark_content.innerHTML = bookmark_html;
-
+            
+            var bookmark_items = bookmark_content.children;
+            for(var i = 0; i < bookmark_items.length; i++)
+            {
+                bookmark_items[i].addEventListener('mousedown', function(event) {
+                    RedmineUtil_colorizeSelection(RedmineUtil_rgb2hex(event.target.style.color),RedmineUtil_rgb2hex(event.target.style.backgroundColor));
+                });
+            }
             for(var i=0;i<bookmark_content.children.length;i++)
             {
                 RedmineUtil_createContextMenu(bookmark_content.children[i]);
