@@ -586,9 +586,9 @@ if(localStorage.getItem('RedmineUtil_enabled')==="TRUE")
                     document.getElementById('RedmineCustomColor').style.backgroundColor = '#' + document.getElementById('RedmineCustomBgColorInput').value;
                 });
                 
-                var customcolor = localStorage.getItem('RedmineUtil_customColor');
-                var custombgcolor  = localStorage.getItem('RedmineUtil_customBgColor');
-            
+                var customcolor = localStorage.getItem('RedmineUtil_customColor') || "FFFFFF";
+                var custombgcolor  = localStorage.getItem('RedmineUtil_customBgColor') || "1C6EA5";
+
                 if(custombgcolor!=undefined)
                 {
                     new jscolor(document.getElementById('RedmineCustomBgColorInput'), {value : custombgcolor});
